@@ -126,13 +126,21 @@ String.prototype.insert = function (index, string) {
     return string + this;
 };
 
-$(".enter").click(function(){
+$(".enter").click(findDerivative);
+$(document).keypress(function(e) {
+    if(e.which == 13) {
+        findDerivative();
+    }
+});
+
+function findDerivative(){
     finalDerivative = "";
     var funcInput = $("textarea").val();
     chainRule(funcInput);
     $(".answer").text(finalDerivative);
     console.log(finalDerivative);
-});
+    $("textarea").val("");
+}
 
 
 
