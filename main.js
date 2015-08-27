@@ -6,7 +6,7 @@ var individualTerms = findTerm(input);
 
 
 chainRule("((x^5 + x^1)^1+5x^1)^3");
-console.log(finalDerivative);
+//console.log(finalDerivative);
 
 
 function cleanFunction(func){
@@ -46,7 +46,7 @@ function chainRule(term){
         coefficient = 1
     }
     var derivative = "";
-    console.log(base);
+    //console.log(base);
 
 
     derivative += (coefficient*power) + "*" + base + "^" + (power-1);
@@ -67,15 +67,7 @@ function chainRule(term){
         finalDerivative = derivative;
     }
 
-    // if(base != ""){
-    //     console.log(derivative);
-    //     if(base == "x"){
-    //         finalDerivative += "(" + derivative + ")*"
-    //     }else{
-    //         finalDerivative += derivative;
-    //     }
-    // }
-
+    //console.log(derivative);
     return derivative;
 
 
@@ -134,6 +126,13 @@ String.prototype.insert = function (index, string) {
     return string + this;
 };
 
+$(".enter").click(function(){
+    finalDerivative = "";
+    var funcInput = $("textarea").val();
+    chainRule(funcInput);
+    $(".answer").text(finalDerivative);
+    console.log(finalDerivative);
+});
 
 
 
