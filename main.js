@@ -1,29 +1,53 @@
 var finalDerivative = "";
 var tempDerivative = "";
-var input = "(x^3 + 5x)^2 + 10x";
-cleanFunction(input);
-var individualTerms = findTerm(input);
+// var input = "(x^3 + 5x)^2 + 10x";
+// cleanFunction(input);
+// var individualTerms = findTerm(input);
 
 
-chainRule("((x^5 + x^1)^1+5x^1)^3");
+//chainRule("((x^5 + x^1)^1+5x^1)^3");
 //console.log(finalDerivative);
 
 
 function cleanFunction(func){
     var cleanedFunc = "";
     for(var i = 0; i < func.length; i++){
-        if(func[i] == "x" && !isNaN(func[i - 1])){
-            cleanedFunc += "*";
+
+        if(func[i] == "x"  && i != func.length - 1 && !isNaN(func[i - 1])){
+            if(i != 0){
+                cleanedFunc += "*";
+            }else{
+                cleanedTerm.insert(0, "*");
+            }
         }
 
         if(func[i] != " "){
             cleanedFunc += func[i];
         }
-        if((func[i] == "x" || func[i] == ")") && func[i+1] != "^"){
+
+        if((func[i] == "x" || func[i] == ")") && i != func.length && func[i+1] != "^" ){
             cleanedFunc += "^1";
         }
     }
-    input = cleanedFunc;
+    var checkingBrackets = 0;
+    for(i in cleanedFunc){
+        if(cleanedFunc[i] == "("){
+            checkingBrackets++;
+        }else if(cleanedFunc[i] == ")"){
+            checkingBrackets--;
+        }
+
+        if(checkingBrackets == 1){
+            if(i >= 1 && cleanedFunc[i-1] != ""){
+
+            }else if(i == 0){
+                cleanedFunc.insert(0, "1*")
+            }
+        }
+    }
+
+    console.log(cleanedFunc);
+    return cleanedFunc;
 }
 
 /*
@@ -46,19 +70,18 @@ function chainRule(term){
         coefficient = 1
     }
     var derivative = "";
-    //console.log(base);
 
 
     derivative += (coefficient*power) + "*" + base + "^" + (power-1);
     if(base[0] == "("){
-        var terms = findTerm(base.substring(1, base.length - 1));
+        var terms = findTerm(base.substring(1, base.length - 1), false);
         var innerDerivative = "(";
         for(i in terms){
-            var tet = chainRule(terms[i]);
+            var innerDerivativeTerms = chainRule(terms[i]);
             if(i != terms.length - 1){
-                innerDerivative += tet + "+";
+                innerDerivative += innerDerivativeTerms + "+";
             }else{
-                innerDerivative += tet;
+                innerDerivative += innerDerivativeTerms;
             }
         }
         innerDerivative += ")"
@@ -67,13 +90,18 @@ function chainRule(term){
         finalDerivative = derivative;
     }
 
-    //console.log(derivative);
+    //check if constant
+    if(base == "" || !isNaN(base)){
+        derivative = "";
+        finalDerivative = "0";
+    }
+
     return derivative;
 
 
 }
 
-function findTerm(func){
+function findTerm(func, clean){
     var term = "";
     var terms = [];
     var currentlyInsideTerm = false;
@@ -83,12 +111,18 @@ function findTerm(func){
         }else if(func[i] == ")" && currentlyInsideTerm){
             currentlyInsideTerm = false;
         }else if((func[i] == "+" || func[i] == "-") && !currentlyInsideTerm){
-            terms.push(cleanUpTerm(term));
+            if(clean){
+                term = cleanUpTerm(term);
+            }
+            terms.push(term);
             term = "";
         }
         //check if last char
         if(i == func.length){
-            terms.push(cleanUpTerm(term));
+            if(clean){
+                term = cleanUpTerm(term);
+            }
+            terms.push(term);
         }
         term += func[i];
 
@@ -103,7 +137,7 @@ function cleanUpTerm(term){
     var cleanedTerm = "";
     for(var i = 0; i < term.length; i++){
         if(term[i] != " "){
-            if(term[i] == "x" && !isNaN(term[i - 1])){
+            if(term[i] == "x" && (!isNaN(term[i - 1]) && term[i-1] != "*")){
                 cleanedTerm += "*";
             }
             cleanedTerm += term[i];
@@ -116,6 +150,7 @@ function cleanUpTerm(term){
     }else{
         term = cleanedTerm;
     }
+
     return term;
 }
 
@@ -135,70 +170,18 @@ $(document).keypress(function(e) {
 
 function findDerivative(){
     finalDerivative = "";
+    tempDerivative = "";
+
     var funcInput = $("textarea").val();
-    chainRule(funcInput);
-    $(".answer").text(finalDerivative);
-    console.log(finalDerivative);
+    funcInput = cleanFunction(funcInput);
+    console.log(funcInput);
+    var terms = findTerm(funcInput);
+    for(i in terms){
+        termDerivative = chainRule(terms[i]);
+        tempDerivative += finalDerivative + " + ";
+    }
+
+    $(".answer").text(tempDerivative);
+    console.log(tempDerivative);
     $("textarea").val("");
 }
-
-
-
-
-// var terms = [];
-// var termIdentity = [];
-// var term = "";
-// var termSignPos = true;
-// var isOperator = 0;
-// var inTerm = false;
-// for(var currChar = 0; currChar <= func.length; currChar++){
-//     isOperator--;
-//
-//     if(func[currChar] != " " || isOperator > 0){
-//         //if it is the last index store it
-//         if(currChar == func.length){
-//             pushTerm();
-//         }else{
-//             //do not include extraneous operators as terms
-//             if(func[currChar] == "+" || func[currChar] == "-"){
-//                 termSignPos = true;
-//                 isOperator = 2;
-//                 if(func[currChar] == "-"){
-//                     termSignPos = false;
-//                 }
-//             }else if(func[currChar] == "(" || func[currChar] == "x"){
-//                 inTerm = true;
-//             }else if(func[currChar] == ")"){
-//                 inTerm = false;
-//             }
-//             //add to term if there is no space
-//             if(func[currChar] != " " && inTerm){
-//                 term += func[currChar];
-//             }
-//         }
-//     }else if(term != ""){
-//         pushTerm();
-//     }
-//
-//
-// }
-// for(i in terms){
-//     console.log(terms[i]);
-//     chainRule(terms[i]);
-// }
-// return terms;
-//
-// function pushTerm(){
-//     cleanUpTerm();
-//     termIdentity.push(term);
-//     termIdentity.push(termSignPos);
-//     terms.push(term);
-//     term = "";
-// }
-// function cleanUpTerm(){
-//     for(var i = 0; i <= 1; i++){
-//         if(term[i] == " " || term[i] == "+"){
-//             term = term.substring(i + 1, term.length);
-//         }
-//     }
-// }
