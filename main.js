@@ -10,6 +10,7 @@ var tempDerivative = "";
 
 
 function cleanFunction(func){
+    //add powers of 1 where necessary
     var cleanedFunc = "";
     for(var i = 0; i < func.length; i++){
 
@@ -29,24 +30,9 @@ function cleanFunction(func){
             cleanedFunc += "^1";
         }
     }
-    var checkingBrackets = 0;
-    for(i in cleanedFunc){
-        if(cleanedFunc[i] == "("){
-            checkingBrackets++;
-        }else if(cleanedFunc[i] == ")"){
-            checkingBrackets--;
-        }
 
-        if(checkingBrackets == 1){
-            if(i >= 1 && cleanedFunc[i-1] != ""){
 
-            }else if(i == 0){
-                cleanedFunc.insert(0, "1*")
-            }
-        }
-    }
 
-    console.log(cleanedFunc);
     return cleanedFunc;
 }
 
@@ -91,7 +77,7 @@ function chainRule(term){
     }
 
     //check if constant
-    if(base == "" || !isNaN(base)){
+    if(base == "" || !isNaN(base) || power == 0){
         derivative = "";
         finalDerivative = "0";
     }
@@ -127,14 +113,16 @@ function findTerm(func, clean){
         term += func[i];
 
     }
-    for(i in terms){
+    //for(i in terms){
         //console.log(terms[i]);
-    }
+    //}
     return terms;
 }
 
 function cleanUpTerm(term){
+
     var cleanedTerm = "";
+    //remove unecessary clutter
     for(var i = 0; i < term.length; i++){
         if(term[i] != " "){
             if(term[i] == "x" && (!isNaN(term[i - 1]) && term[i-1] != "*")){
@@ -145,12 +133,31 @@ function cleanUpTerm(term){
     }
 
     if(cleanedTerm[0] == "+" || cleanedTerm[0] == "-"){
-        term = cleanedTerm.substring(1, cleanedTerm.length);
-    }else{
-        term = cleanedTerm;
+        cleanedTerm = cleanedTerm.substring(1, cleanedTerm.length);
     }
 
-    return term;
+    //retitterate to check coefficients
+    var checkingBrackets = 0;
+    for(i in cleanedTerm){
+        if(checkingBrackets == 0 && cleanedTerm[i] == "(" && cleanedTerm[i-1] != "*"){
+
+
+            cleanedTerm.insert(i,"1*");
+            //special case when
+            if(i == 0){
+                cleanedTerm = "1*" + cleanedTerm;
+            }
+        }
+
+        if(cleanedTerm[i] == "("){
+            checkingBrackets++;
+        }else if(cleanedTerm[i] == ")"){
+            checkingBrackets--;
+        }
+    }
+    console.log(cleanedTerm);
+
+    return cleanedTerm;
 }
 
 String.prototype.insert = function (index, string) {
@@ -160,21 +167,37 @@ String.prototype.insert = function (index, string) {
     return string + this;
 };
 
-$(".enter").click(findDerivative);
+$(".enter").click(main);
 $(document).keypress(function(e) {
     if(e.which == 13) {
-        findDerivative();
+        main();
     }
 });
 
-function findDerivative(){
+
+function main(){
     finalDerivative = "";
     tempDerivative = "";
 
     var funcInput = $("textarea").val();
     funcInput = cleanFunction(funcInput);
-    console.log(funcInput);
-    var terms = findTerm(funcInput);
+    console.log("input: " + funcInput);
+    calculateDerivative(funcInput);
+
+
+
+    $(".answer").text(tempDerivative);
+    //console.log(tempDerivative);
+    $("textarea").val("");
+}
+
+
+/*
+ * This method will determine which rule to use.
+ * eg: (product rule, chain rule, etc.)
+ */
+function calculateDerivative(terms){
+    terms = findTerm(terms, true);
     for(i in terms){
         termDerivative = chainRule(terms[i]);
         if(i != terms.length - 1){
@@ -183,8 +206,4 @@ function findDerivative(){
             tempDerivative += finalDerivative;
         }
     }
-
-    $(".answer").text(tempDerivative);
-    console.log(tempDerivative);
-    $("textarea").val("");
 }
