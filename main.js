@@ -146,7 +146,6 @@ function cleanUpTerm(term){
 
     if(cleanedTerm[0] == "+" || cleanedTerm[0] == "-"){
         term = cleanedTerm.substring(1, cleanedTerm.length);
-
     }else{
         term = cleanedTerm;
     }
@@ -178,7 +177,11 @@ function findDerivative(){
     var terms = findTerm(funcInput);
     for(i in terms){
         termDerivative = chainRule(terms[i]);
-        tempDerivative += finalDerivative + " + ";
+        if(i != terms.length - 1){
+            tempDerivative += finalDerivative + " + ";
+        }else{
+            tempDerivative += finalDerivative;
+        }
     }
 
     $(".answer").text(tempDerivative);
