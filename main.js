@@ -1,5 +1,6 @@
 var finalDerivative = "";
 var tempDerivative = "";
+var dev = "";
 // var input = "(x^3 + 5x)^2 + 10x";
 // cleanFunction(input);
 // var individualTerms = findTerm(input);
@@ -14,11 +15,11 @@ function cleanFunction(func){
     var cleanedFunc = "";
     for(var i = 0; i < func.length; i++){
 
-        if(func[i] == "x"  && i != func.length - 1 && !isNaN(func[i - 1])){
-            if(i != 0){
+        if(func[i] == "x"  && i != func.length - 1 && !isNaN(func[i - 1]) && (func[i-1] != " " && func[i-1] != 5/0 && func[i-1] != "+")){
+            if(i > 1){
                 cleanedFunc += "*";
             }else{
-                cleanedTerm.insert(0, "*");
+                cleanedFunc.insert(0, "*");
             }
         }
 
@@ -59,8 +60,10 @@ function chainRule(term){
 
 
     derivative += (coefficient*power) + "*" + base + "^" + (power-1);
+    //console.log(term + "|  |" + base);
     if(base[0] == "("){
-        var terms = findTerm(base.substring(1, base.length - 1), false);
+        //console.log(term + "|  |"  +base );
+        var terms = findTerm(base.substring(1, base.length - 1));
         var innerDerivative = "(";
         for(i in terms){
             var innerDerivativeTerms = chainRule(terms[i]);
@@ -70,12 +73,15 @@ function chainRule(term){
                 innerDerivative += innerDerivativeTerms;
             }
         }
+
         innerDerivative += ")"
         finalDerivative = (derivative + "*" + innerDerivative);
+        console.log(innerDerivative);
     }else{
         finalDerivative = derivative;
     }
-
+    ////////////////
+    dev+= finalDerivative;
     //check if constant
     if(base == "" || !isNaN(base) || power == 0){
         derivative = "";
@@ -87,7 +93,7 @@ function chainRule(term){
 
 }
 
-function findTerm(func, clean){
+function findTerm(func){
     var term = "";
     var terms = [];
     var currentlyInsideTerm = false;
@@ -97,17 +103,13 @@ function findTerm(func, clean){
         }else if(func[i] == ")" && currentlyInsideTerm){
             currentlyInsideTerm = false;
         }else if((func[i] == "+" || func[i] == "-") && !currentlyInsideTerm){
-            if(clean){
-                term = cleanUpTerm(term);
-            }
+            term = cleanUpTerm(term);
             terms.push(term);
             term = "";
         }
         //check if last char
         if(i == func.length){
-            if(clean){
-                term = cleanUpTerm(term);
-            }
+            term = cleanUpTerm(term);
             terms.push(term);
         }
         term += func[i];
@@ -197,9 +199,10 @@ function main(){
  * eg: (product rule, chain rule, etc.)
  */
 function calculateDerivative(terms){
-    terms = findTerm(terms, true);
-    for(i in terms){
+    terms = findTerm(terms);
+    for(var i = 0; i < terms.length; i++){
         termDerivative = chainRule(terms[i]);
+        //console.log(i + "       " + terms.length);
         if(i != terms.length - 1){
             tempDerivative += finalDerivative + " + ";
         }else{
